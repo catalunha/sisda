@@ -1,7 +1,5 @@
 import 'package:get/get.dart';
 import 'package:sisda/app/data/datasources/back4app/auth/auth_repository_exception.dart';
-import 'package:sisda/app/data/datasources/back4app/entity/user_entity.dart';
-import 'package:sisda/app/domain/models/user_model.dart';
 import 'package:sisda/app/domain/usecases/auth/auth_usecase.dart';
 import 'package:sisda/app/presentation/controllers/auth/splash/splash_controller.dart';
 import 'package:sisda/app/presentation/controllers/utils/mixins/loader_mixin.dart';
@@ -34,9 +32,7 @@ class LoginController extends GetxController with LoaderMixin, MessageMixin {
       final user =
           await _authUseCase.loginEmail(email: email, password: password);
       if (user != null) {
-        UserModel userModel = UserEntity().fromParse(user as ParseUser);
-
-        _splashController.userModel = userModel;
+        _splashController.userModel = user;
         final parseUser = await ParseUser.currentUser() as ParseUser;
         _splashController.parseUser = parseUser;
 
