@@ -14,6 +14,7 @@ import 'package:sisda/app/presentation/views/milestone/equals/milestone_equals_l
 import 'package:sisda/app/presentation/views/milestone/list/milestone_list_page.dart';
 import 'package:sisda/app/presentation/views/milestone/others/milestone_others_list_page.dart';
 import 'package:sisda/app/presentation/views/milestone/readfile/milestone_readfile_page.dart';
+import 'package:sisda/app/presentation/views/milestone/sigef/milestone_sigef_page.dart';
 import 'package:sisda/app/presentation/views/user/profile/user_profile_page.dart';
 
 class Routes {
@@ -31,6 +32,8 @@ class Routes {
 
   static const milestoneOthersList = '/milestone/others/list';
   static const milestoneEqualsList = '/milestone/equals/list';
+
+  static const milestoneSigef = '/milestone/sigef';
 
   static final pageList = [
     GetPage(
@@ -82,6 +85,11 @@ class Routes {
       name: Routes.milestoneEqualsList,
       binding: MilestoneDependencies(),
       page: () => MilestoneEqualsListPage(),
+    ),
+    GetPage(
+      name: Routes.milestoneSigef,
+      binding: MilestoneDependencies(),
+      page: () => MilestoneSigefPage(),
     ),
   ];
 }

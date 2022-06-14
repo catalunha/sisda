@@ -55,6 +55,12 @@ class _HomePageState extends State<HomePage> {
                 onTap: () => Get.toNamed(Routes.milestoneEqualsList,
                     arguments: 'EqualsMilestones'),
               ),
+              itemGrid(
+                image: AppAssets.milestoneProcess,
+                text: 'Marcos Sigef',
+                onTap: () => Get.toNamed(Routes.milestoneSigef,
+                    arguments: 'myMilestones'),
+              ),
             ],
           ),
         )

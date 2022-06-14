@@ -28,6 +28,8 @@ dependencies:
   # outros
   uuid: ^3.0.6
   validatorless: ^1.2.1
+  # csv
+  spreadsheet_decoder: ^2.1.0
 
 
 dev_dependencies:

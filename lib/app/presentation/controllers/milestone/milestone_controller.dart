@@ -1,14 +1,18 @@
+import 'dart:typed_data';
+
 import 'package:get/get.dart';
 import 'package:sisda/app/data/datasources/back4app/milestone/milestone_repository_exception.dart';
 import 'package:sisda/app/domain/models/csv_model.dart';
 import 'package:sisda/app/domain/models/milestone_model.dart';
 import 'package:sisda/app/domain/models/milestones_equals_calcs_model.dart';
 import 'package:sisda/app/domain/models/milestones_equals_model.dart';
+import 'package:sisda/app/domain/models/ods_sigef.dart';
 import 'package:sisda/app/domain/usecases/milestone/milestone_usecase.dart';
 import 'package:sisda/app/presentation/controllers/auth/splash/splash_controller.dart';
 import 'package:sisda/app/presentation/controllers/utils/mixins/loader_mixin.dart';
 import 'package:sisda/app/presentation/controllers/utils/mixins/message_mixin.dart';
 import 'package:sisda/app/routes.dart';
+import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
 class MilestoneController extends GetxController
     with LoaderMixin, MessageMixin {
@@ -40,6 +44,8 @@ class MilestoneController extends GetxController
 
   var fileString = ''.obs;
 
+  Uint8List? fileInBytes;
+
   @override
   void onInit() {
     String arg = Get.arguments;
@@ -53,6 +59,33 @@ class MilestoneController extends GetxController
     loaderListener(_loading);
     messageListener(_message);
     super.onInit();
+  }
+
+  readCsv() {
+    var decoder = SpreadsheetDecoder.decodeBytes(fileInBytes!, update: true);
+    var table = decoder.tables['perimetro_1'];
+    // var row = table!.rows[8];
+    // var value = row[3];
+    // var value = table!.rows[8][3];
+    // print(table!.rows[8][3]);
+    // print(table.rows[8][5]);
+    // print(table.rows[4][1]);
+    // for (var table in decoder.tables.keys) {
+    //   print(table);
+    //   print(decoder.tables[table]!.maxCols);
+    //   print(decoder.tables[table]!.maxRows);
+    //   for (var row in decoder.tables[table]!.rows) {
+    //     print('$row');
+    //   }
+    // }
+    OsdSigef osdSigef = OsdSigef(decoder);
+    osdSigef.setSheet('perimetro_1');
+    print(osdSigef.getValue('B', 4));
+    print(osdSigef.getValue('B', 5));
+    var listV = osdSigef.readVertices();
+    for (var v in listV) {
+      print(v.toString());
+    }
   }
 
   Future<void> listMyMilestones() async {
