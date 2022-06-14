@@ -7,6 +7,7 @@ import 'package:sisda/app/domain/models/milestone_model.dart';
 import 'package:sisda/app/domain/models/milestones_equals_calcs_model.dart';
 import 'package:sisda/app/domain/models/milestones_equals_model.dart';
 import 'package:sisda/app/domain/models/ods_sigef.dart';
+import 'package:sisda/app/domain/models/vertice_model.dart';
 import 'package:sisda/app/domain/usecases/milestone/milestone_usecase.dart';
 import 'package:sisda/app/presentation/controllers/auth/splash/splash_controller.dart';
 import 'package:sisda/app/presentation/controllers/utils/mixins/loader_mixin.dart';
@@ -38,6 +39,8 @@ class MilestoneController extends GetxController
 
   final _csvList = <CsvModel>[].obs;
   List<CsvModel> get csvList => _csvList.toList();
+  final _verticeList = <VerticeModel>[].obs;
+  List<VerticeModel> get verticeList => _verticeList.toList();
 
   final _milestoneSearchList = <MilestoneModel>[].obs;
   List<MilestoneModel> get milestoneSearch => _milestoneSearchList.toList();
@@ -61,31 +64,35 @@ class MilestoneController extends GetxController
     super.onInit();
   }
 
-  readCsv() {
-    var decoder = SpreadsheetDecoder.decodeBytes(fileInBytes!, update: true);
-    var table = decoder.tables['perimetro_1'];
-    // var row = table!.rows[8];
-    // var value = row[3];
-    // var value = table!.rows[8][3];
-    // print(table!.rows[8][3]);
-    // print(table.rows[8][5]);
-    // print(table.rows[4][1]);
-    // for (var table in decoder.tables.keys) {
-    //   print(table);
-    //   print(decoder.tables[table]!.maxCols);
-    //   print(decoder.tables[table]!.maxRows);
-    //   for (var row in decoder.tables[table]!.rows) {
-    //     print('$row');
-    //   }
-    // }
-    OsdSigef osdSigef = OsdSigef(decoder);
-    osdSigef.setSheet('perimetro_1');
-    print(osdSigef.getValue('B', 4));
-    print(osdSigef.getValue('B', 5));
-    var listV = osdSigef.readVertices();
-    for (var v in listV) {
-      print(v.toString());
+  readSigef() {
+    try {
+      _loading(true);
+      _verticeList.clear();
+      var decoder = SpreadsheetDecoder.decodeBytes(fileInBytes!, update: true);
+      OsdSigef osdSigef = OsdSigef(decoder);
+      osdSigef.setSheet('perimetro_1');
+      // print(osdSigef.getValue('B', 4));
+      // print(osdSigef.getValue('B', 5));
+      var listV = osdSigef.readVertices();
+      // for (var v in listV) {
+      //   _verticeList.add(v);
+      // }
+      _verticeList(listV);
+      analyzeDuplicateMilestone2();
+    } catch (e) {
+      _loading(false);
+      _message.value = MessageModel(
+        title: 'Erro no arquivo',
+        message: 'Nao foi possivel ler os dados',
+        isError: true,
+      );
+    } finally {
+      _loading(false);
     }
+  }
+
+  void removeVerticeSigef(int id) async {
+    _verticeList.removeAt(id);
   }
 
   Future<void> listMyMilestones() async {
@@ -312,6 +319,64 @@ class MilestoneController extends GetxController
     }
   }
 
+  Future<void> saveVerticeSigefCloud({
+    required String utmFuso,
+    required String utmZona,
+    required String utmPole,
+  }) async {
+    try {
+      _loading(true);
+      if (_verticeList.isNotEmpty) {
+        SplashController splashController = Get.find();
+        for (var line in _verticeList) {
+          if (line.duplicated == null) {
+            var model = MilestoneModel(
+              user: splashController.userModel!,
+              name: line.name,
+              utmx: line.utmX!,
+              utmy: line.utmY!,
+              utmz: line.utmZ!,
+              // lat: line.lat!,
+              // long: line.long!,
+              utmfuso: utmFuso,
+              utmzone: utmZona,
+              utmpole: utmPole,
+            );
+            await _milestoneUseCase.create(model);
+          } else {
+            var model = MilestoneModel(
+              id: line.duplicated,
+              user: splashController.userModel!,
+              name: line.name,
+              utmx: line.utmX!,
+              utmy: line.utmY!,
+              utmz: line.utmZ!,
+              // lat: line.lat!,
+              // long: line.long!,
+              utmfuso: utmFuso,
+              utmzone: utmZona,
+              utmpole: utmPole,
+            );
+            await _milestoneUseCase.update(model);
+          }
+        }
+      } else {
+        throw Exception();
+      }
+    } catch (e) {
+      _loading(false);
+      _message.value = MessageModel(
+        title: 'Erro em salvar dados',
+        message: 'Nao foi possivel salvar os dados',
+        isError: true,
+      );
+    } finally {
+      fileString.value = '';
+      listMyMilestones();
+      _loading(false);
+    }
+  }
+
   void add() {
     print('add');
     _milestone.value = null;
@@ -441,6 +506,19 @@ class MilestoneController extends GetxController
     }
   }
 
+  analyzeDuplicateMilestone2() {
+    for (var milestone in milestones) {
+      // print(milestone.name);
+      for (var i = 0; i < verticeList.length; i++) {
+        // print(csvList[i].name);
+        if (verticeList[i].name == milestone.name) {
+          _verticeList.replaceRange(
+              i, i + 1, [verticeList[i].copyWith(duplicated: milestone.id)]);
+        }
+      }
+    }
+  }
+
   onMilestoneSearch(String value, bool myMilestones) async {
     print('onMilestoneSearch $value');
     if (value.isEmpty) {
@@ -460,8 +538,4 @@ class MilestoneController extends GetxController
     }
     print(_milestoneSearchList.length);
   }
-
-  // offMilestoneSearch() {
-  //   _milestoneSearchList.clear();
-  // }
 }

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sisda/app/domain/models/csv_model.dart';
+import 'package:sisda/app/domain/models/vertice_model.dart';
 import 'package:sisda/app/domain/utils/dropdown_values.dart';
 import 'package:sisda/app/domain/utils/enums.dart';
 import 'package:sisda/app/presentation/controllers/milestone/milestone_controller.dart';
 import 'package:sisda/app/presentation/views/milestone/sigef/parts/file_bytes_button.dart';
 import 'package:sisda/app/presentation/views/utils/app_appbar.dart';
 import 'package:sisda/app/presentation/views/utils/app_dropdown.dart';
-import 'package:sisda/app/presentation/views/utils/app_launch.dart';
 
 class MilestoneSigefPage extends StatefulWidget {
   final MilestoneController _milestoneController = Get.find();
@@ -31,7 +30,7 @@ class _MilestoneSigefPageState extends State<MilestoneSigefPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppAppbar(
-        title: const Text('Selecionar, analisar e salvar'),
+        title: const Text('Arquivo do SIGEF'),
       ),
       body: Container(
         margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -41,18 +40,13 @@ class _MilestoneSigefPageState extends State<MilestoneSigefPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 FileBytesButton(),
-                ElevatedButton(
-                    onPressed: () {
-                      widget._milestoneController.readCsv();
-                    },
-                    child: const Text('Processar csv')),
                 Obx(
                   () => widget._milestoneController.fileString.isNotEmpty
                       ? Column(
                           children: [
                             ElevatedButton(
                               onPressed: () {
-                                widget._milestoneController.processFile();
+                                widget._milestoneController.readSigef();
                               },
                               child: const Text('Importar e analisar.'),
                             ),
@@ -108,7 +102,8 @@ class _MilestoneSigefPageState extends State<MilestoneSigefPage> {
                             ),
                             ElevatedButton(
                               onPressed: () async {
-                                await widget._milestoneController.saveCloud(
+                                await widget._milestoneController
+                                    .saveVerticeSigefCloud(
                                   utmFuso: UtmFuso2.values[indexFuso],
                                   utmZona: UtmZone2.values[indexZone],
                                   utmPole: UtmPole2.values[indexPole],
@@ -135,33 +130,40 @@ class _MilestoneSigefPageState extends State<MilestoneSigefPage> {
       header('#'),
       header('Name'),
       header('UTM'),
+      header('Sigma'),
       header('Geog.'),
-      header('Elev.'),
+      header('Pos.'),
+      header('Lim.'),
       header('Sts.'),
       header('Loc.'),
       header('Del.'),
     ]));
-    for (var i = 0; i < widget._milestoneController.csvList.length; i++) {
-      CsvModel csvModel = widget._milestoneController.csvList[i];
+    for (var i = 0; i < widget._milestoneController.verticeList.length; i++) {
+      VerticeModel verticeModel = widget._milestoneController.verticeList[i];
       rows.add(
         TableRow(
           children: [
             line(i + 1),
-            line(csvModel.name),
-            line('${csvModel.utmx}\n${csvModel.utmy}'),
-            line('${csvModel.lat}\n${csvModel.long}'),
-            line(csvModel.utmz),
-            csvModel.duplicated == null
+            line(verticeModel.name),
+            line(
+                '${verticeModel.utmX}\n${verticeModel.utmY}\n${verticeModel.utmZ}'),
+            line(
+                '${verticeModel.utmXSigma}\n${verticeModel.utmYSigma}\n${verticeModel.utmZSigma}'),
+            line('...'),
+            line('${verticeModel.positioningMethod}'),
+            line('${verticeModel.limitType}'),
+            verticeModel.duplicated == null
                 ? const Icon(Icons.add)
                 : const Icon(Icons.copy_outlined),
-            InkWell(
-              onTap: () =>
-                  AppLaunch.launchGoogleMaps(csvModel.lat!, csvModel.long!),
-              child: const Icon(Icons.location_on),
-            ),
+            const Icon(Icons.not_interested_rounded),
+            // InkWell(
+            //   onTap: () =>
+            //       AppLaunch.launchGoogleMaps(csvModel.lat!, csvModel.long!),
+            //   child: const Icon(Icons.location_on),
+            // ),
             InkWell(
               onTap: () {
-                widget._milestoneController.deleteCsv(i);
+                widget._milestoneController.removeVerticeSigef(i);
               },
               child: const Icon(Icons.delete_forever),
             ),

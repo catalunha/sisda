@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               itemGrid(
                   image: AppAssets.milestoneMy,
-                  text: 'Meus Marcos',
+                  text: 'Marcos Conferidos',
                   onTap: () {
                     print('click');
                     Get.toNamed(Routes.milestoneList,
@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
                   }),
               itemGrid(
                 image: AppAssets.milestoneOther,
-                text: 'Outros Marcos',
+                text: 'Marcos propostos',
                 onTap: () => Get.toNamed(Routes.milestoneOthersList,
                     arguments: 'OthersMilestones'),
               ),
@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
                     arguments: 'EqualsMilestones'),
               ),
               itemGrid(
-                image: AppAssets.milestoneProcess,
+                image: AppAssets.sigef,
                 text: 'Marcos Sigef',
                 onTap: () => Get.toNamed(Routes.milestoneSigef,
                     arguments: 'myMilestones'),
