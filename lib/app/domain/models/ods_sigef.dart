@@ -41,23 +41,31 @@ class OsdSigef {
       if (cols[0] == null) {
         readNext = false;
       } else {
-        tempVertices.add(
-          VerticeModel(
-            name: cols[0].toString(),
-            utmX: double.tryParse(cols[1].toString().replaceAll(',', '.')),
-            utmXSigma: double.tryParse(cols[2].toString().replaceAll(',', '.')),
-            utmY: double.tryParse(cols[3].toString().replaceAll(',', '.')),
-            utmYSigma: double.tryParse(cols[4].toString().replaceAll(',', '.')),
-            utmZ: double.tryParse(cols[5].toString().replaceAll(',', '.')),
-            utmZSigma: double.tryParse(cols[6].toString().replaceAll(',', '.')),
-            positioningMethod: cols[7]?.toString(),
-            limitType: cols[8]?.toString(),
-            cns: cols[9]?.toString(),
-            matricula: cols[10]?.toString(),
-            descritivo: cols[11]?.toString(),
-            observations: [],
-          ),
+        VerticeModel verticeModel = VerticeModel(
+          name: cols[0].toString(),
+          utmX: double.tryParse(cols[1].toString().replaceAll(',', '.')),
+          utmXSigma: double.tryParse(cols[2].toString().replaceAll(',', '.')),
+          utmY: double.tryParse(cols[3].toString().replaceAll(',', '.')),
+          utmYSigma: double.tryParse(cols[4].toString().replaceAll(',', '.')),
+          utmZ: double.tryParse(cols[5].toString().replaceAll(',', '.')),
+          utmZSigma: double.tryParse(cols[6].toString().replaceAll(',', '.')),
+          positioningMethod: cols[7]?.toString(),
+          limitType: cols[8]?.toString(),
+          cns: cols[9]?.toString(),
+          matricula: cols[10]?.toString(),
+          descritivo: cols[11]?.toString(),
+          observations: [],
         );
+
+        // var nameSplit = verticeModel.name.split('-');
+        // String verticeType = nameSplit[1];
+        // if (!PositioningMethod
+        //     .positioningMethodMap[verticeModel.positioningMethod]!.verticeType
+        //     .contains(verticeType)) {
+        //   throw Exception('Erro em vertice');
+        // }
+
+        tempVertices.add(verticeModel);
         if ((rowStart + 1) < _sheetActive!.maxRows) {
           rowStart++;
         } else {
